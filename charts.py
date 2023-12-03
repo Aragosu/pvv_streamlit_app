@@ -1,5 +1,4 @@
 import streamlit as st
-#import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
@@ -18,7 +17,7 @@ d_work = pd.read_csv('D_work.csv')
 
 
 #============================= 1.Препроцессинг
-# обработка пропусков
+# обработка дубликатов
 d_salary = d_salary.drop_duplicates(keep='first')
 
 # сведение данных по кредитам
@@ -28,6 +27,7 @@ d_loan_full = d_loan_full.groupby(['ID_CLIENT'])\
     .reset_index()
 d_loan_full.columns = ['ID_CLIENT', 'LOAN_NUM_TOTAL', 'LOAN_NUM_CLOSED']
 
+# сведение в общую таблицу
 full_data = pd.merge(d_clients, d_target, left_on='ID', right_on='ID_CLIENT', how='left')\
     .drop(['ID_CLIENT','AGREEMENT_RK'],axis=1)\
 .merge(d_job, left_on='ID', right_on='ID_CLIENT', how='left')\
@@ -39,14 +39,17 @@ full_data = pd.merge(d_clients, d_target, left_on='ID', right_on='ID_CLIENT', ho
 .merge(d_loan_full, left_on='ID', right_on='ID_CLIENT', how='left')\
     .drop('ID_CLIENT',axis=1)
 
+# обработка значений
 full_data['SOCSTATUS_WORK_FL'] = np.where(full_data["SOCSTATUS_WORK_FL"] == 1, 'работает', 'не работает')
 full_data['SOCSTATUS_PENS_FL'] = np.where(full_data["SOCSTATUS_PENS_FL"] == 1, 'пенсионер', 'не пенсионер')
 full_data['GENDER'] = np.where(full_data["GENDER"] == 1, 'мужчина', 'женщина')
 full_data['FL_PRESENCE_FL'] = np.where(full_data["FL_PRESENCE_FL"] == 1, 'есть', 'нет')
 full_data['TARGET_text'] = np.where(full_data["TARGET"] == 1, 'был отклик', 'отклика не было')
 
+# удаление ненужных столбцов
 full_data = full_data.drop(columns=['ID','REG_ADDRESS_PROVINCE','POSTAL_ADDRESS_PROVINCE'])
 
+# маска для имен столбцов на русском
 desd = {'clmns': list(full_data.columns),
         'desc':['Возраст',
                 'Пол',
@@ -75,16 +78,15 @@ desd = {'clmns': list(full_data.columns),
                ]}
 df_desc = pd.DataFrame(desd)
 
+# разбивка столбцов на категории для виджетов
 digit_columns = full_data.select_dtypes(include=[np.int64, np.float64]).columns
 specify_columns = ['GEN_INDUSTRY','FACT_ADDRESS_PROVINCE']
 alpha_columns = [i for i in full_data.select_dtypes(include=[object]).columns if i not in specify_columns]
 
 
 
-#============================= 1.2. уберем специфичные данные
-#full_data = full_data[full_data.WORK_TIME < max(full_data.WORK_TIME)]
-
-
+#============================= 2. Работа с выбросами
+# функция для очистки выбросов (для некоторых столбцов)
 def del_out_col(col):
     Q1 = col.quantile(0.25)
     Q3 = col.quantile(0.75)
@@ -94,7 +96,7 @@ def del_out_col(col):
 
 outliners_column = ['WORK_TIME']
 
-#============================= 2.Визуализации
+#============================= 3. Функции для виджетов
 def dist_bar(data):
     if data.nunique() > 20:
         nbin = 15
@@ -203,12 +205,14 @@ def hist_target(col):
     return fig
 
 
-#===================================== Верстка страницы
+#===================================== 4. Верстка дэша
 st.write('''
 # EDA по клиентам банка
 ''')
 st.warning("В данных не были обработаны пропуски, т.к. это не требовалось по заданию")
 
+
+# оч хотел все по вкладкам)
 tab1, tab2, tab3 = st.tabs(['Графики распределения + статистика',
                             'Матрица корреляций',
                             'График зависимости целевой'])
@@ -238,3 +242,7 @@ with tab3:
         (list(full_data.columns)),
         key = "2")
     st.plotly_chart(hist_target(option2), use_container_width=True)
+
+
+
+st.markdown('Автор: Панфиленко В.В.')
