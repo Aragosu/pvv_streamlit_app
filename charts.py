@@ -6,15 +6,15 @@ import numpy as np
 import pandas as pd
 
 #============================= 0. Чтение датасетов
-d_clients = pd.read_csv('datasets\D_clients.csv')
-d_close_loan = pd.read_csv('datasets\D_close_loan.csv')
-d_job = pd.read_csv('datasets\D_job.csv')
-d_last_credit = pd.read_csv('datasets\D_last_credit.csv')
-d_loan = pd.read_csv('datasets\D_loan.csv')
-d_pens = pd.read_csv('datasets\D_pens.csv')
-d_salary = pd.read_csv('datasets\D_salary.csv')
-d_target = pd.read_csv('datasets\D_target.csv')
-d_work = pd.read_csv('datasets\D_work.csv')
+d_clients = pd.read_csv('D_clients.csv')
+d_close_loan = pd.read_csv('D_close_loan.csv')
+d_job = pd.read_csv('D_job.csv')
+d_last_credit = pd.read_csv('D_last_credit.csv')
+d_loan = pd.read_csv('D_loan.csv')
+d_pens = pd.read_csv('D_pens.csv')
+d_salary = pd.read_csv('D_salary.csv')
+d_target = pd.read_csv('D_target.csv')
+d_work = pd.read_csv('D_work.csv')
 
 
 #============================= 1.Препроцессинг
