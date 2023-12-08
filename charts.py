@@ -4,50 +4,10 @@ import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
 
-#============================= 0. Чтение датасетов
-d_clients = pd.read_csv('D_clients.csv')
-d_close_loan = pd.read_csv('D_close_loan.csv')
-d_job = pd.read_csv('D_job.csv')
-d_last_credit = pd.read_csv('D_last_credit.csv')
-d_loan = pd.read_csv('D_loan.csv')
-d_pens = pd.read_csv('D_pens.csv')
-d_salary = pd.read_csv('D_salary.csv')
-d_target = pd.read_csv('D_target.csv')
-d_work = pd.read_csv('D_work.csv')
-
-
-#============================= 1.Препроцессинг
-# обработка дубликатов
-d_salary = d_salary.drop_duplicates(keep='first')
-
-# сведение данных по кредитам
-d_loan_full = pd.merge(d_loan, d_close_loan, on='ID_LOAN', how='left')
-d_loan_full = d_loan_full.groupby(['ID_CLIENT'])\
-    .agg({'ID_LOAN': 'count','CLOSED_FL': 'sum'})\
-    .reset_index()
-d_loan_full.columns = ['ID_CLIENT', 'LOAN_NUM_TOTAL', 'LOAN_NUM_CLOSED']
-
-# сведение в общую таблицу
-full_data = pd.merge(d_clients, d_target, left_on='ID', right_on='ID_CLIENT', how='left')\
-    .drop(['ID_CLIENT','AGREEMENT_RK'],axis=1)\
-.merge(d_job, left_on='ID', right_on='ID_CLIENT', how='left')\
-    .drop('ID_CLIENT',axis=1)\
-.merge(d_salary, left_on='ID', right_on='ID_CLIENT', how='left')\
-    .drop('ID_CLIENT',axis=1)\
-.merge(d_last_credit, left_on='ID', right_on='ID_CLIENT', how='left')\
-    .drop('ID_CLIENT',axis=1)\
-.merge(d_loan_full, left_on='ID', right_on='ID_CLIENT', how='left')\
-    .drop('ID_CLIENT',axis=1)
-
-# обработка значений
-full_data['SOCSTATUS_WORK_FL'] = np.where(full_data["SOCSTATUS_WORK_FL"] == 1, 'работает', 'не работает')
-full_data['SOCSTATUS_PENS_FL'] = np.where(full_data["SOCSTATUS_PENS_FL"] == 1, 'пенсионер', 'не пенсионер')
-full_data['GENDER'] = np.where(full_data["GENDER"] == 1, 'мужчина', 'женщина')
-full_data['FL_PRESENCE_FL'] = np.where(full_data["FL_PRESENCE_FL"] == 1, 'есть', 'нет')
-full_data['TARGET_text'] = np.where(full_data["TARGET"] == 1, 'был отклик', 'отклика не было')
+#============================= 0. Чтение + небольшая очистка
 
 # удаление ненужных столбцов
-full_data = full_data.drop(columns=['ID','REG_ADDRESS_PROVINCE','POSTAL_ADDRESS_PROVINCE'])
+full_data = pd.read_csv('full_data.csv').drop(columns=['ID','REG_ADDRESS_PROVINCE','POSTAL_ADDRESS_PROVINCE'])
 
 # маска для имен столбцов на русском
 desd = {'clmns': list(full_data.columns),
