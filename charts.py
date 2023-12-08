@@ -196,6 +196,7 @@ with tab1:
 with tab2:
     st.info("Матрица корреляции составлена только по числовым признакам")
     st.plotly_chart(corr_bar(full_data[digit_columns]), use_container_width=True)
+    st.table(df_desc[df_desc.clmns.isin(digit_columns.values)])
 with tab3:
     option2 = st.selectbox(
         'Графики распределения каждого признака',
